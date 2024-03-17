@@ -11,9 +11,11 @@ export default function App() {
   const [accessToken, setAccessToken] = React.useState(null);
   const [user, setUser] = React.useState(null);
 
+  const web = String(CLIENT_WEB_ID);
+  const ios = String(CLIENT_IOS_ID)
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: String(CLIENT_WEB_ID),
-    iosClientId: String(CLIENT_IOS_ID),
+    clientId: web ,
+    iosClientId: ios,
   });
 
 
@@ -56,17 +58,10 @@ export default function App() {
       {user && <ShowUserInfo />}
       {user === null && (
         <>
-          <Text style={{ fontSize: 35, fontWeight: "bold" }}>Welcome</Text>
-          <Text
-            style={{
-              fontSize: 25,
-              fontWeight: "bold",
-              marginBottom: 20,
-              color: "gray",
-            }}
-          >
-            Please login
-          </Text>
+          <Image
+              source={require("./assets/images/Pisheru.png")}
+              style={{ width: 300, height: 40 }}
+            />
           <TouchableOpacity
             disabled={!request}
             onPress={() => {
@@ -74,8 +69,8 @@ export default function App() {
             }}
           >
             <Image
-              source={require("./btn.png")}
-              style={{ width: 300, height: 40 }}
+              source={require("./assets/images/login.svg")}
+              style={{ width: 288, height: 288 }}
             />
           </TouchableOpacity>
         </>
