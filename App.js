@@ -69,7 +69,7 @@ export default function App() {
             }}
           >
             <Image
-              source={require("./assets/images/login.svg")}
+              source={require("./assets/images/google_login.png")}
               style={{ width: 288, height: 288 }}
             />
           </TouchableOpacity>
