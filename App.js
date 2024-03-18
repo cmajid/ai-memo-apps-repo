@@ -2,7 +2,6 @@ import LoginScreen from "./src/screens/loginScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { DashboardScreen } from "./src/screens/dashboardScreen";
-
 const Stack = createNativeStackNavigator();
 
 export default function App() {

@@ -4,12 +4,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import { CLIENT_WEB_ID, CLIENT_IOS_ID } from "@env";
 import * as WebBrowser from "expo-web-browser";
-WebBrowser.maybeCompleteAuthSession();
 import * as Google from "expo-auth-session/providers/google";
+import storage from "../libraries/storage/storage";
 
-export default function LoginScreen({navigation}) {
+WebBrowser.maybeCompleteAuthSession();
+export default function LoginScreen({ navigation }) {
   const [accessToken, setAccessToken] = React.useState(null);
-  const [user, setUser] = React.useState(null);
 
   const web = String(CLIENT_WEB_ID);
   const ios = String(CLIENT_IOS_ID);
@@ -30,25 +30,16 @@ export default function LoginScreen({navigation}) {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     const useInfo = await response.json();
-    setUser(useInfo);
-  }
+    storage.save({
+      key: "loginState", // Note: Do not use underscore("_") in key!
+      data: useInfo,
 
-  const ShowUserInfo = () => {
-    if (user) {
-      return (
-        <View
-          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
-        >
-          <Text>Welcome</Text>
-          <Image
-            source={{ uri: user.picture }}
-            style={{ width: 100, height: 100, borderRadius: 50 }}
-          />
-          <Text>{user.name}</Text>
-        </View>
-      );
-    }
-  };
+      // if expires not specified, the defaultExpires will be applied instead.
+      // if set to null, then it will never expire.
+      expires: 1000 * 3600,
+    });
+    navigation.replace("Dashboard", { name: "Jane" });
+  }
 
   return (
     <LinearGradient colors={["#fcfcfc", "#fcfcfc"]} style={styles.container}>
