@@ -7,7 +7,7 @@ import * as WebBrowser from "expo-web-browser";
 WebBrowser.maybeCompleteAuthSession();
 import * as Google from "expo-auth-session/providers/google";
 
-export default function Login() {
+export default function LoginScreen({navigation}) {
   const [accessToken, setAccessToken] = React.useState(null);
   const [user, setUser] = React.useState(null);
 
@@ -39,14 +39,12 @@ export default function Login() {
         <View
           style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
-          <Text >
-            Welcome
-          </Text>
+          <Text>Welcome</Text>
           <Image
             source={{ uri: user.picture }}
             style={{ width: 100, height: 100, borderRadius: 50 }}
           />
-          <Text >{user.name}</Text>
+          <Text>{user.name}</Text>
         </View>
       );
     }
@@ -63,7 +61,14 @@ export default function Login() {
       <View style={styles.login}>
         <CButton
           icon="google"
-          onPress={() => { promptAsync()}}
+          title="Go to Dashboard"
+          onPress={() => navigation.navigate("Dashboard", { name: "Jane" })}
+        />
+        <CButton
+          icon="google"
+          onPress={() => {
+            promptAsync();
+          }}
           title="Sign in with Google"
           colors={["#2B86C5", "#2B86C5"]}
         />
