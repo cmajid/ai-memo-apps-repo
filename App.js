@@ -11,15 +11,15 @@ export default function App() {
         <Stack.Screen
           name="Login"
           component={LoginScreen}
-          options={{ title: "Login" }}
+          options={{  headerShown: false }}
         />
         <Stack.Screen
           name="Dashboard"
           component={DashboardScreen}
           options={{
             title: "Dashboard",
-            animation: "fade",
-            animationDuration: 1000,
+            animation: "none",
+            // animationDuration: 1000,
           }}
         />
       </Stack.Navigator>

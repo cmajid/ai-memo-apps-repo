@@ -5,40 +5,50 @@ import React from "react";
 import { CLIENT_WEB_ID, CLIENT_IOS_ID } from "@env";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
-import storage from "../libraries/storage/storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 WebBrowser.maybeCompleteAuthSession();
-export default function LoginScreen({ navigation }) {
-  const [accessToken, setAccessToken] = React.useState(null);
+const web = String(CLIENT_WEB_ID);
+const ios = String(CLIENT_IOS_ID);
 
-  const web = String(CLIENT_WEB_ID);
-  const ios = String(CLIENT_IOS_ID);
+export default function LoginScreen({ navigation }) {
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     clientId: web,
     iosClientId: ios,
   });
-
   React.useEffect(() => {
-    if (response?.type === "success") {
-      setAccessToken(response.authentication.accessToken);
-      accessToken && fetchUserInfo();
-    }
-  }, [response, accessToken]);
+    handleUseEffect();
+  }, [response]);
 
-  async function fetchUserInfo() {
+  const handleUseEffect = async () => {
+    const user = await getLocalUser();
+    if (user) {
+      navigation.replace("Dashboard");
+      return;
+    }
+    if (response?.type !== "success") return;
+    fetchUserInfo(response.authentication.accessToken);
+  };
+
+  const getLocalUser = async () => {
+    const data = await AsyncStorage.getItem("@user");
+    if (!data) return null;
+    return JSON.parse(data);
+  };
+
+  async function getUserInfo(token: string) {
     let response = await fetch("https://www.googleapis.com/userinfo/v2/me", {
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
     const useInfo = await response.json();
-    storage.save({
-      key: "loginState", // Note: Do not use underscore("_") in key!
-      data: useInfo,
+    return useInfo;
+  }
 
-      // if expires not specified, the defaultExpires will be applied instead.
-      // if set to null, then it will never expire.
-      expires: 1000 * 3600,
-    });
-    navigation.replace("Dashboard", { name: "Jane" });
+  async function fetchUserInfo(token: string) {
+    if (!token) return;
+    const useInfo = await getUserInfo(token);
+    await AsyncStorage.setItem("@user", JSON.stringify(useInfo));
+    navigation.replace("Dashboard");
   }
 
   return (
@@ -52,11 +62,6 @@ export default function LoginScreen({ navigation }) {
       <View style={styles.login}>
         <CButton
           icon="google"
-          title="Go to Dashboard"
-          onPress={() => navigation.navigate("Dashboard", { name: "Jane" })}
-        />
-        <CButton
-          icon="google"
           onPress={() => {
             promptAsync();
           }}
@@ -66,6 +71,8 @@ export default function LoginScreen({ navigation }) {
       </View>
     </LinearGradient>
   );
+
+
 }
 
 const styles = StyleSheet.create({
