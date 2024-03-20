@@ -16,7 +16,9 @@ export function DashboardScreen({ navigation, route }) {
     const userinfo = await AsyncStorage.getItem("@user");
     setUser(JSON.parse(userinfo));
   };
-
+  //  // console.log("navigation", navigation)
+  //   //console.log("route", route)
+  //   {route.params.name}
   return (
     <>
       <Text>This is dashboard</Text>
@@ -26,7 +28,7 @@ export function DashboardScreen({ navigation, route }) {
             Welcome
           </Text>
           <Image
-            source={{ uri: user.picture }}
+            source={{ uri: user.photo }}
             style={{ width: 100, height: 100, borderRadius: 50 }}
           />
           <Text style={{ fontSize: 20, fontWeight: "bold" }}>{user.name}</Text>

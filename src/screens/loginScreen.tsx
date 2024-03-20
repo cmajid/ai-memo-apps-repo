@@ -6,19 +6,45 @@ import { CLIENT_WEB_ID, CLIENT_IOS_ID } from "@env";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as AuthSession from "expo-auth-session";
 
 WebBrowser.maybeCompleteAuthSession();
-const web = String(CLIENT_WEB_ID);
 const ios = String(CLIENT_IOS_ID);
 
 export default function LoginScreen({ navigation }) {
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: web,
     iosClientId: ios,
   });
   React.useEffect(() => {
     handleUseEffect();
   }, [response]);
+
+  const refreshToken = async (refreshToken: string) => {
+    const tokenResult = await AuthSession.refreshAsync(
+      {
+        clientId: ios,
+        refreshToken: refreshToken,
+      },
+      {
+        tokenEndpoint: "https://www.googleapis.com/oauth2/v4/token",
+      }
+    );
+    return tokenResult;
+  };
+  const getMemoToken = async (idToken: string) => {
+    let response = await fetch("http://localhost:3002/auth/verify", {
+      method: "POST",
+      body: JSON.stringify({
+        idToken,
+      }),
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+    const useInfo = await response.json();
+    return useInfo;
+  };
 
   const handleUseEffect = async () => {
     const user = await getLocalUser();
@@ -27,7 +53,10 @@ export default function LoginScreen({ navigation }) {
       return;
     }
     if (response?.type !== "success") return;
-    fetchUserInfo(response.authentication.accessToken);
+
+    const memoToken = await getMemoToken(response.authentication.idToken);
+    await AsyncStorage.setItem("@user", JSON.stringify(memoToken.user));
+    navigation.replace("Dashboard");
   };
 
   const getLocalUser = async () => {
@@ -36,26 +65,11 @@ export default function LoginScreen({ navigation }) {
     return JSON.parse(data);
   };
 
-  async function getUserInfo(token: string) {
-    let response = await fetch("https://www.googleapis.com/userinfo/v2/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const useInfo = await response.json();
-    return useInfo;
-  }
-
-  async function fetchUserInfo(token: string) {
-    if (!token) return;
-    const useInfo = await getUserInfo(token);
-    await AsyncStorage.setItem("@user", JSON.stringify(useInfo));
-    navigation.replace("Dashboard");
-  }
-
   return (
-    <LinearGradient colors={["#fcfcfc", "#fcfcfc"]} style={styles.container}>
+    <LinearGradient colors={["#f9f9f9", "#faf9f7"]} style={styles.container}>
       <View style={styles.body}>
         <Image
-          source={require("../assets/images/puppy.png")}
+          source={require("../assets/images/puppy.jpeg")}
           style={{ width: "100%", height: 400 }}
         />
       </View>
@@ -71,8 +85,6 @@ export default function LoginScreen({ navigation }) {
       </View>
     </LinearGradient>
   );
-
-
 }
 
 const styles = StyleSheet.create({
